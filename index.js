@@ -29,7 +29,7 @@ function init() {
                 case "Update employee role":
                     return updateEmployeeRole();
                 default:
-                    return stop()
+                    return stop();
             }
         });
 };
