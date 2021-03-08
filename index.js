@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const { getTable } = require("console.table");
 require("console.table");
-
+const db = require("./db/index.js");
 
 function init() {
     inquirer.prompt([
@@ -34,7 +34,7 @@ function init() {
         });
 };
 
-function addDepartment() {
+async function addDepartment() {
     inquirer.prompt([
         {
             name: "answer",
@@ -42,55 +42,113 @@ function addDepartment() {
             message: "name?"
         }
     ]) 
-    .then((response) => {
-        // send to database
+    .then(async(response) => {
+        await db.addDepartment(response.answer);
         console.log(`Added ${response.answer} to the database!`);
+        init();
     }); 
 }
-function addRole() {
+async function addRole() {
+    const dept = await db.deptChoices(); 
+    const deptChoices = dept.map(({ id, name}) => ({
+        name: name,
+        value: id
+    }));
     inquirer.prompt([
         {
             name: "answer",
             type: "input",
             message: "name?"
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "salary"
+        },
+        {
+            name: "dept",
+            type: "list",
+            message: "department?",
+            choices: deptChoices
         }
     ]) 
-    .then((response) => {
-        // send to database
+    .then(async(response) => {
+        await db.addRole(response.answer, response.salary, response.dept);
         console.log(`Added ${response.answer} to the database!`);
+        init();
     }); 
 }
-function addEmployee() {
+async function addEmployee() {
+    const role = await db.roleChoices(); 
+    const roleChoices = role.map(({ id, title}) => ({
+        name: title,
+        value: id
+    })); 
+    const mgr = await db.mgrChoices(); 
+    const mgrChoices = mgr.map(({ id, Name}) => ({
+        name: Name,
+        value: id
+    }));
+    mgrChoices.unshift({name: "none", value: null})
     inquirer.prompt([
         {
-            name: "answer",
+            name: "first",
             type: "input",
-            message: "name?"
-        }
+            message: "first name?"
+        },
+        {
+            name: "last",
+            type: "input",
+            message: "last name?"
+        },
+        {
+            name: "role",
+            type: "list",
+            message: "role?",
+            choices: roleChoices
+        },
+        {
+            name: "mgr",
+            type: "list",
+            message: "manager?",
+            choices: mgrChoices
+        },
     ]) 
-    .then((response) => {
-        // send to database
-        console.log(`Added ${response.answer} to the database!`);
+    .then(async(response) => {
+        await db.addEmployee(response.first, response.last, response.role, response.mgr);
+        console.log(`Added ${response.first} ${response.last} to the database!`);
+        init();
     }); 
 }
-function viewDepartment() {
+async function viewDepartment() {
     // get from database
-    const dbValues; 
+    const dbValues = await db.viewDepartment(); 
     console.table(dbValues);
+    init();
 }
-function viewRole() {
+async function viewRole() {
      // get from database
-     const dbValues; 
+     const dbValues = await db.viewRole(); 
      console.table(dbValues);
+     init();
 }
-function viewEmployee() {
+async function viewEmployee() {
      // get from database
-     const dbValues; 
+     const dbValues = await db.viewEmployee(); 
      console.table(dbValues);
+     init();
 }
-function updateEmployeeRole() {
-    const employeeChoices;
-    const roleChoices;
+async function updateEmployeeRole() {
+    const mgr = await db.mgrChoices(); 
+    const employeeChoices = mgr.map(({ id, Name}) => ({
+        name: Name,
+        value: id
+    }));
+    const role = await db.roleChoices(); 
+    const roleChoices = role.map(({ id, title}) => ({
+        name: title,
+        value: id
+    }));
     inquirer.prompt([
         {
             name: "employee",
@@ -101,15 +159,19 @@ function updateEmployeeRole() {
         {
             name: "role",
             type: "list",
-            message: "name?",
+            message: "role?",
             choices: roleChoices
         }
     ]) 
-    .then((response) => {
-        // send to database
+    .then(async(response) => {
+        await db.updateEmployeeRole(response.employee,response.role)
         console.log("updated employee!");
+        init();
     }); 
 }
 function stop() {
-
+    console.log("see you later!");
+    process.exit();
 }
+
+init();
