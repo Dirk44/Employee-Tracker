@@ -9,7 +9,7 @@ function init() {
             type: "list",
             message: "What would you like to do?",
             name: "init",
-            choices: ["Add department", "Add role", "Add employee", "View department", "View role", "View employee", "Update employee role"]
+            choices: ["Add department", "Add role", "Add employee", "View department", "View role", "View employee", "Update employee role", "Quit me"]
         }
     ])
         .then((response) => {
